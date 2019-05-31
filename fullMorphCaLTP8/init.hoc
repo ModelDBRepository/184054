@@ -1,0 +1,301 @@
+// DECLARE OBJECTS TO BE ASSIGNED DURING initchannels() CALL
+
+objref osec[10]
+objref neurAreas,neurNames,curSecname[1] // parameters inherent to determining surface area of branches
+objref seclistDist // list of distal neurites
+objref normNeurAreas,nnaInt, randGen, randGenAnat // used for distributing input across branches
+strdef sectionToAccess // used for distributing input
+objref ampa[1],nmda[1],ncAMPA[1],ncNMDA[1] // simple synapses
+
+// LOAD SECTION LISTS
+{
+	xopen("seclists.hoc")
+}
+
+// LOAD PARAMETERS FOR CHANNELS
+{
+	load_file("channelParameters.hoc")
+}
+
+
+// LOAD COMMON FUNCTIONS USED FOR ASSIGNING CHANNEL DISTRIBUTIONS
+{
+	load_file("../commonFcns/round.hoc") // loads a rounding function
+	load_file("../commonFcns/pause.hoc") // loads a pausing function
+}
+	
+proc initchannels(){
+
+	ttxInBath = $1 // simulate TTX in bath?  0 = no; 1 = yes
+	
+	forall {
+		insert pas  g_pas=1/(Rm)  Ra=global_ra  e_pas=Vleak                   
+		insert id
+	 	insert cdp
+	}
+	
+	forall {
+		for (x) {
+			id1_id(x) = 0
+			id2_id(x) = 0
+			id3_id(x) = 0
+			id4_id(x) = 0
+			id5_id(x) = 0
+		}
+	}
+	
+	if (abs(ttxInBath-1)<1e-5){
+		// cut density of channels
+		gnainit = gnainit0*ttxScale
+		gnaslope = gnaslope0*ttxScale
+	}else{
+		gnainit = gnainit0
+		gnaslope = gnaslope0
+	}
+	
+	somaA { 
+		insert nax  gbar_nax=gnabar  
+		insert kdr  gkdrbar_kdr=gkdr
+		insert kap  gkabar_kap=gkap
+		insert kad  gkabar_kad=0
+		insert calH gcalbar_calH=0
+		insert pas	e_pas=Vleak  g_pas=1/Rm   Ra=global_ra  cm=Cm
+	}
+	
+	hill { 
+		insert nax  gbar_nax=gnabar  
+		insert kdr  gkdrbar_kdr=gkdr
+		insert kap  gkabar_kap=gkap
+		insert kad  gkabar_kad=0
+		insert calH gcalbar_calH=0
+		insert pas	e_pas=Vleak  g_pas=1/Rm   Ra=global_ra   cm=Cm
+	}
+	
+	iseg { 
+		insert nax  gbar_nax=gnabar  
+		insert kdr  gkdrbar_kdr=gkdr
+		insert kap  gkabar_kap=gkap
+		insert kad  gkabar_kad=0
+		insert calH gcalbar_calH = 0
+		insert pas	e_pas=Vleak  g_pas=1/Rm   Ra=global_ra   cm=Cm
+	}
+	
+	for i=0,2 inode[i] { 
+		insert nax  gbar_nax=gnabar  
+		insert kdr  gkdrbar_kdr=gkdr
+		insert kap  gkabar_kap=gkap*0.2
+		insert kad  gkabar_kad=0
+		insert calH gcalbar_calH=0
+		insert pas	e_pas=Vleak  g_pas=1/Rm   Ra=global_ra   cm=Cmy
+	}
+	
+	for i=0,1 node[i] { 
+		insert nax  gbar_nax=gnode  
+		insert kdr  gkdrbar_kdr=gkdr
+		insert kap  gkabar_kap=gkap*0.2
+		insert kad  gkabar_kad=0
+		insert calH gcalbar_calH=0
+		insert pas	e_pas=Vleak  g_pas=1/Rn   Ra=global_ra   cm=Cm
+	}
+	
+	forsec all_basals {
+		insert nax  gbar_nax=gnabar  
+		insert kdr  gkdrbar_kdr=gkdr
+		insert kap  gkabar_kap=gkap
+		insert kad  gkabar_kad=0
+		insert calH gcalbar_calH=0
+		insert pas	e_pas=Vleak  g_pas=1/Rm   Ra=global_ra  cm=Cm
+	}
+	
+	access somaA
+	area(0.5)
+	distance()
+		
+	forsec all_apicals {
+		insert pas	e_pas=Vleak  Ra=global_ra 
+		for (x) {
+			xdist=distance(x)
+			id2_id(x) = xdist		// id2 stores xdist, the path distance of each segment from the soma
+			if (xdist <= spinelimit) {
+				g_pas(x) = 1/Rm
+				cm(x) = Cm
+			} else {
+				g_pas(x) = spinefactor/Rm
+				cm(x) = spinefactor*Cm
+			}
+		}
+		insert nax	
+		insert kdr	gkdrbar_kdr=gkdr
+		insert kap
+		insert kad
+		insert calH gcalbar_calH = 0
+		gkabar_kap = 0
+		gkabar_kad = 0
+		
+		for (x) {
+			xdist = distance(x)
+			xdistNoLimit = xdist
+			if (xdist > dlimit) {
+				xdist = dlimit
+			}
+			gkabar_kap(x) = 0
+			gkabar_kad(x) = 0
+			gbar_nax(x) = gnainit-xdistNoLimit*gnaslope
+			if (xdist > dprox) {
+				gkabar_kad(x) = gkad*(1+xdist*dslope)
+			} else {
+				gkabar_kap(x) = gkap*(1+xdist*dslope)
+			}
+		}
+	}
+	   
+	forsec primary_apical_list {
+		id1_id = 1				// id1=1 means the section is on the primary apical branch
+	}
+	
+	forsec all_apicals {
+		if (id1_id == 1) {			// skip the sections on the primary branch
+			continue
+		}
+		osec[0] = new SectionRef()		// osec[0] contains the current oblique branch in the list
+		for p = 1, 10 {
+			osec[p-1].parent {
+				osec[p] = new SectionRef()	// osec[1] references the parent of osec[0], osec[2] references 
+				id1 = id1_id			// the parent of osec[1] etc. until the primary branch
+			}
+			if (id1 == 1) { 		// if osec[p] is the primary branch, stop incrementing p 
+				break
+			}
+		}
+		access osec[p-1].sec	// access the first parent oblique branch
+		pdist = id2_id(0)	// pdist is the distance of the parent oblique branch from the soma
+		for (x) {
+			if (x == 0) {
+				odist = distance()	// odist is zeroed to where the parent oblique branch intersects the primary branch
+			}
+		}
+		access osec[0].sec
+		for (x) {
+			odist = distance(x) 	// odist is the distance of each segment along the oblique branch
+			id3_id(x) = odist
+			if (pdist > dlimit) {
+				pdist_k = dlimit
+			} else {
+				pdist_k = pdist
+			}				
+			if (gkabar_kap(x) > 0) {
+				gkabar_kap(x) = gkap*(1+pdist_k*dslope+odist*okslope)
+			}
+			if (gkabar_kad(x) > 0) {
+			gkabar_kad(x) = gkad*(1+pdist_k*dslope+odist*okslope)
+			}
+			if (gkabar_kap(x) > okmax) {
+				gkabar_kap(x) = okmax
+			}
+			if (gkabar_kad(x) > okmax) {
+				gkabar_kad(x) = okmax
+			}
+			
+		}
+	}
+	
+	
+	somaA { 
+		distance()
+	}
+	forsec all_basals {
+		for (x) {
+			odist=distance(x)
+			id3_id(x) = odist	
+			gkabar_kap(x) = gkap*(1+odist*okslope)
+			if (gkabar_kap(x) > okmax) {
+				gkabar_kap(x) = okmax
+			}
+		}
+	}
+	
+	// INCORPORATE SLOW INACTIVATION
+	forall {ar2_nax=slowInact}
+	
+	// SURFACE AREA CALCULATION	
+	// determine surface area of all branching neurites and add them to a list
+	objref curSecname[numDistNeurites]
+	neuriteArea=0
+	neurAreas = new Vector(numDistNeurites)
+	neurNames = new List()
+	seclistDist = new SectionList()
+	numDistNeurites=0
+	forsec distTuft{
+		insert calH gcalbar_calH = gcad
+	
+		numDistNeurites+=1
+		curSecname[numDistNeurites-1] = new String()
+		seclistDist.append()
+		for (x) {
+			neuriteArea+=area(x)
+		}
+		neurAreas.x[numDistNeurites-1] = neuriteArea
+		curSecname[numDistNeurites-1].s = secname()
+		neurNames.append(curSecname[numDistNeurites-1])
+		neuriteArea=0
+		
+	}
+
+	// DISTRIBUTE SYNAPSES
+	objref normNeurAreas,nnaInt
+	distNeurSum = neurAreas.sum()
+
+
+	normNeurAreas = new Vector()
+	nnaInt = new Vector()
+	
+	normNeurAreas.copy(neurAreas)
+	normNeurAreas.div(distNeurSum)
+	nnaInt.integral(normNeurAreas)
+		
+	objref randGen,randGenAnat
+	randGen = new Random(theSeed)
+	randGenAnat = new Random()
+	randGen.uniform(0,1)
+	randGenAnat = new Random(theSeed+1e6)
+	randGenAnat.uniform(0,1)
+	
+	objref ampa[numSyn],nmda[numSyn],ncAMPA[numSyn],ncNMDA[numSyn]
+	curSyn = 0
+	
+	strdef sectionToAccess
+	for m=1,numSyn {
+	
+		curRand = randGen.repick()
+		while(curRand>nnaInt.x[curSyn]){
+			curSyn+=1
+		}
+		
+		// access section
+		sprint(sectionToAccess,"access %s",neurNames.o(curSyn).s)
+		execute(sectionToAccess)
+		
+		curSyn=0
+		curRandAnat = randGenAnat.repick()
+		curRandAnatB = (int(curRandAnat*nseg)*2+1)/(nseg*2)		
+		
+		// DEFINE FEATURES OF SIMPLE SYNAPSES
+		ampa[m-1] = new Exp2Syn(curRandAnatB)
+		nmda[m-1] = new Exp2SynNMDA(curRandAnatB)
+		
+		ncAMPA[m-1] = new NetCon(ppStim,ampa[m-1])
+		ncNMDA[m-1] = new NetCon(ppStim,nmda[m-1])
+		
+		ampa[m-1].tau1 = 0.2 	// msec; Jarsky et al 2005
+		ampa[m-1].tau2 = 2 	// msec; Jarsky et al 2005
+		
+		nmda[m-1].tau1 = 1//10//5
+		nmda[m-1].tau2 = 50//500//250 
+		
+		ncAMPA[m-1].weight = ampaWeight
+		ncNMDA[m-1].weight = nmdaWeight
+		ncAMPA[m-1].delay = 0
+		ncNMDA[m-1].delay = 0
+		
+	}
+}

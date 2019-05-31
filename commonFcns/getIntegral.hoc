@@ -1,0 +1,37 @@
+// The below function is designed to return a integral, with the baseline
+// removed.
+// NOTE: requires a fixed time step.
+// INPUT 1: vector to integrate
+// INPUT 2: step size, in msec, used in experiments
+// INPUT 3: time that indicates when to take the beginning of the integral
+// INPUT 4: time that indicates when to take the end of the integral
+// OUTPUT: the integral of the voltage response
+
+func getIntegral() {local step localobj theVec,theVecSub,theVecInt
+
+	// copy the voltage trace to theVec
+	theVec = new Vector()
+	theVec.copy($o1)
+	
+	// get step size
+	step = $2
+	
+	// subtract baseline
+	initTime = $3 // index to calculate baseline voltage
+	baseVolt = theVec.x[initTime/step-1]
+	baseVolt = baseVolt*-1
+	theVec.add(baseVolt)
+	
+	// extract the neighbourhood of interest
+	termTime = $4 // terminal index
+	theVecSub = new Vector()
+	theVecSub.copy(theVec,initTime/step,termTime/step)
+		
+	// integrate the neighbourhood of interest
+	theVecInt = new Vector()
+	theVecInt.integral(theVecSub,step)
+	
+	// return full integral, found in last entry of integrated vector
+	theInt = theVecInt.x[theVecInt.size()-1]
+	return theInt
+}

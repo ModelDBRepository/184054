@@ -1,0 +1,34 @@
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// DO A COMPREHENSIVE ANALYSIS OF SEVERAL VARIABLES WITHIN THE SIMULATION
+// ACROSS THE MORPHOLOGY
+//
+// Note: voltage is not initialized to a perfect steady state at time zero, which is
+// related to the calcium handling mechanisms. However, our conclusions are robust for
+// any particular choices of the time for baseline. Users are encouraged to pay attention
+// only to the response when steady state is reached.
+//
+///////////////////////////////////////////////////////////////////////////////////////////
+
+// DECLARE PARAMETERS
+{
+	tstop = 250
+	ppStim.APinburst = 4
+	tBaseline = 20
+	ppStim.t01 = tBaseline	// Time for baseline
+}
+
+// ESTABLISH RECORDING SITES AND RUN SIMULATION
+{	
+	xopen("runTBSCC.hoc")
+}
+
+// ANALYSE OUTPUT
+{	
+	xopen("analyseTBSCC.hoc")
+}
+
+// GENERATE FIGURES
+{	
+	xopen("plotTBSCC.hoc")
+}

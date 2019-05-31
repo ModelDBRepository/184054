@@ -1,0 +1,11 @@
+// reset nseg so none smaller than segL microns
+segL = 5		// the length (in microns) of each dendritic segment
+forall { ns=int(L/segL+0.5)
+        if (ns==0) {
+             ns=1
+        }
+        if ((ns-int(ns/2)*2)==0) {
+             ns=ns+1
+        }
+        nseg = ns
+}

@@ -1,0 +1,34 @@
+///////////////////////////////////////////////////////////////////////////////
+// FOR HISTOGRAMS, SOMETIMES IT IS INFORMATIVE TO PLOT AS BARGRAPHS.  THIS 
+// ROUTINE TAKES AN x- AND y-AXIS AND COMPUTES THE AXES NEEDED TO 
+// VISUALIZE AS A BAR GRAPH, RATHER TAHN A LINE GRAPH
+///////////////////////////////////////////////////////////////////////////////
+
+objref barOutY,barOutX
+proc vecToBarvec(){ local vvv,dx localobj xAxisVec,yAxisVec
+	xAxisVec = $o1 // x axis of histogram
+	yAxisVec = $o2 // y axis of histogram
+	
+	dx = xAxisVec.x[xAxisVec.size()-1] - xAxisVec.x[xAxisVec.size()-2]
+	
+	xAxisVec.append(xAxisVec.x[xAxisVec.size()-1]+dx) // append final entry
+	
+	barOutY = new Vector(3*yAxisVec.size())
+	barOutX = new Vector(3*yAxisVec.size())
+	
+	for vvv=0,yAxisVec.size()-1{
+		
+		barOutX.x[3*vvv] = xAxisVec.x[vvv]
+		barOutX.x[3*vvv+1] = xAxisVec.x[vvv]
+		barOutX.x[3*vvv+2] = xAxisVec.x[vvv + 1]
+		
+		barOutY.x[3*vvv] = 0
+		barOutY.x[3*vvv+1] = yAxisVec.x[vvv]
+		barOutY.x[3*vvv+2] = yAxisVec.x[vvv]
+		
+	}
+	
+	// add "bookends" to both vectors
+	barOutX.append(xAxisVec.x[vvv])
+	barOutY.append(0)	
+}

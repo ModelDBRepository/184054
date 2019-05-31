@@ -1,0 +1,14 @@
+// This function returns the decimal part of value of x / y
+// Argument 1 = x, Argument 2 = y
+// by Ching-Lung Hsu (2012)
+
+func decimal(){ local aa, bb, Arg1, Arg2
+	
+	Arg1 = $1
+	Arg2 = $2
+	
+	aa = Arg1 / Arg2 
+	bb = aa - int(aa)  // int return the integer part  
+
+	return bb
+}

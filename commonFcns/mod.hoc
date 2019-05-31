@@ -1,0 +1,14 @@
+// This function returns the value of x modulo y, the remainder from x / y
+// Argument 1 = x, Argument 2 = y
+// by Ching-Lung Hsu (2012)
+
+func mod(){ local aa, bb, Arg1, Arg2
+	
+	Arg1 = $1
+	Arg2 = $2
+	
+	aa = Arg1 / Arg2 
+	bb = Arg1 - int(aa)*Arg2  // int return the integer part  
+
+	return bb
+}

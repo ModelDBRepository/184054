@@ -1,0 +1,30 @@
+// RETURN A CUMULATIVE HISTOGRAM
+// INPUT1: the vector values with which to create cumulative histogram
+// INPUT2: low value for histogram
+// INPUT3: high value for histogram
+// INPUT4: numer of bins
+// OUTPUT1: histogram of results, named "curHist"
+// OUTPUT2: cum histogram of results, named "curCumHist"
+// OUTPUT2: x axis of histograms, named "curX"
+
+objref curHist,curCumHist,curX
+curHist = new Vector()
+curCumHist = new Vector()
+curX = new Vector()
+
+proc getCumHist(){ local lowVal,highVal,numBins,dVal localobj initVec
+	// give local names
+	initVec = $o1
+	lowVal = $2
+	highVal = $3
+	dVal = $4
+	
+	curX.indgen(lowVal,highVal,dVal)
+	curHist = initVec.histogram(lowVal,highVal,dVal)
+	curHist.remove(0) // remove first element to match X and Y axis -- see NEURON's Vector class implementation
+	
+	curCumHist = new Vector()
+	
+	curCumHist.integral(curHist)
+	curCumHist.div(initVec.size()) // normalise
+}

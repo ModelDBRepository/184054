@@ -1,0 +1,254 @@
+///////////////////////////////////////////////////////////////////////////////
+// PEAK ANALYSIS FOR SYNAPTIC LOCATIONS
+///////////////////////////////////////////////////////////////////////////////
+
+// for unsorted responses
+
+objref voltACSFPeak,voltDrugPeak
+objref nmdaACSFPeak,nmdaDrugPeak,ogbACSFPeak,ogbDrugPeak
+
+voltACSFPeak = new Vector(numSyn)
+voltDrugPeak = new Vector(numSyn)
+nmdaACSFPeak = new Vector(numSyn)
+nmdaDrugPeak = new Vector(numSyn)
+ogbACSFPeak = new Vector(numSyn)
+ogbDrugPeak = new Vector(numSyn)
+
+for m=1,numSyn{
+	voltACSFPeak.x[m-1] = voltACSF[m-1].max
+	voltDrugPeak.x[m-1] = voltDrug[m-1].max
+	nmdaACSFPeak.x[m-1] = nmdaACSF[m-1].min
+	nmdaDrugPeak.x[m-1] = nmdaDrug[m-1].min
+	
+	Peak = ogbACSF[m-1].max                     
+	Baseline = ogbACSF[m-1].min
+	ogbACSFPeak.x[m-1] = Peak - Baseline	       
+	Peak = ogbDrug[m-1].max
+	Baseline = ogbDrug[m-1].min
+	ogbDrugPeak.x[m-1] = Peak - Baseline
+}
+
+// for sorted responses
+
+objref voltACSFPeakSort,voltDrugPeakSort
+objref nmdaACSFPeakSort,nmdaDrugPeakSort,ogbACSFPeakSort,ogbDrugPeakSort
+
+voltACSFPeakSort = new Vector(numSyn)
+voltDrugPeakSort = new Vector(numSyn)
+nmdaACSFPeakSort = new Vector(numSyn)
+nmdaDrugPeakSort = new Vector(numSyn)
+ogbACSFPeakSort = new Vector(numSyn)
+ogbDrugPeakSort = new Vector(numSyn)
+
+for m=1,numSyn{
+	curInd = inputDistsSortX.x[m-1]             // retrieve original indices for making the responses sorted (sorted by distance)	                                            
+	
+	voltACSFPeakSort.x[m-1] = voltACSFPeak.x[curInd]
+	voltDrugPeakSort.x[m-1] = voltDrugPeak.x[curInd]
+	nmdaACSFPeakSort.x[m-1] = nmdaACSFPeak.x[curInd]
+	nmdaDrugPeakSort.x[m-1] = nmdaDrugPeak.x[curInd]
+	ogbACSFPeakSort.x[m-1] = ogbACSFPeak.x[curInd]
+	ogbDrugPeakSort.x[m-1] = ogbDrugPeak.x[curInd]	
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// PEAK ANALYSIS FOR RANDOM LOCATIONS
+/////////////////////////////////////////////////////////////////////////////
+
+// for unsorted responses
+
+objref voltACSFBPeak,voltDrugBPeak,ogbACSFBPeak,ogbDrugBPeak
+
+voltACSFBPeak = new Vector(numScan)
+voltDrugBPeak = new Vector(numScan)
+ogbACSFBPeak = new Vector(numScan)
+ogbDrugBPeak = new Vector(numScan)
+
+for m=1,numScan{
+	voltACSFBPeak.x[m-1] = voltACSFB[m-1].max
+	voltDrugBPeak.x[m-1] = voltDrugB[m-1].max
+	
+	Peak = ogbACSFB[m-1].max                     
+	Baseline = ogbACSFB[m-1].min
+	ogbACSFBPeak.x[m-1] = Peak - Baseline	       
+	Peak = ogbDrugB[m-1].max
+	Baseline = ogbDrugB[m-1].min
+	ogbDrugBPeak.x[m-1] = Peak - Baseline
+}
+
+// for sorted responses
+
+objref voltACSFBPeakSort,voltDrugBPeakSort,ogbACSFBPeakSort,ogbDrugBPeakSort
+voltACSFBPeakSort = new Vector(numScan)
+voltDrugBPeakSort = new Vector(numScan)
+ogbACSFBPeakSort = new Vector(numScan)
+ogbDrugBPeakSort = new Vector(numScan)
+
+for m=1,numScan{
+	curInd = randDistsSortX.x[m-1]
+	
+	voltACSFBPeakSort.x[m-1] = voltACSFBPeak.x[curInd]
+	voltDrugBPeakSort.x[m-1] = voltDrugBPeak.x[curInd]
+	ogbACSFBPeakSort.x[m-1] = ogbACSFBPeak.x[curInd]
+	ogbDrugBPeakSort.x[m-1] = ogbDrugBPeak.x[curInd]
+	
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// INTEGRAL ANALYSIS FOR SYNAPTIC LOCATIONS
+//////////////////////////////////////////////////////////////////////////////
+
+// LOAD NECESSARY FUNCTIONS
+{
+	load_file("getVoltageIntegral.hoc")  
+}
+	
+// for unsorted responses
+
+objref voltACSFInt,voltDrugInt
+objref nmdaACSFInt,nmdaDrugInt,ogbACSFInt,ogbDrugInt
+
+voltACSFInt = new Vector(numSyn)
+voltDrugInt = new Vector(numSyn)
+nmdaACSFInt = new Vector(numSyn)
+nmdaDrugInt = new Vector(numSyn)
+ogbACSFInt = new Vector(numSyn)
+ogbDrugInt = new Vector(numSyn)
+
+for m=1,numSyn{
+	voltACSFInt.x[m-1] = getVoltageIntegral(voltACSF[m-1],dt,tBaseline,tstop)
+	voltDrugInt.x[m-1] = getVoltageIntegral(voltDrug[m-1],dt,tBaseline,tstop)
+	nmdaACSFInt.x[m-1] = getVoltageIntegral(nmdaACSF[m-1],dt,tBaseline,tstop)
+	nmdaDrugInt.x[m-1] = getVoltageIntegral(nmdaDrug[m-1],dt,tBaseline,tstop)
+	ogbACSFInt.x[m-1] = getVoltageIntegral(ogbACSF[m-1],dt,tBaseline,tstop)
+	ogbDrugInt.x[m-1] = getVoltageIntegral(ogbDrug[m-1],dt,tBaseline,tstop)
+}
+
+// for sorted responses
+
+objref voltACSFIntSort,voltDrugIntSort
+objref nmdaACSFIntSort,nmdaDrugIntSort,ogbACSFIntSort,ogbDrugIntSort
+
+voltACSFIntSort = new Vector(numSyn)
+voltDrugIntSort = new Vector(numSyn)
+nmdaACSFIntSort = new Vector(numSyn)
+nmdaDrugIntSort = new Vector(numSyn)
+ogbACSFIntSort = new Vector(numSyn)
+ogbDrugIntSort = new Vector(numSyn)
+
+for m=1,numSyn{
+	curInd = inputDistsSortX.x[m-1]
+	
+	voltACSFIntSort.x[m-1] = voltACSFInt.x[curInd]
+	voltDrugIntSort.x[m-1] = voltDrugInt.x[curInd]
+	nmdaACSFIntSort.x[m-1] = nmdaACSFInt.x[curInd]
+	nmdaDrugIntSort.x[m-1] = nmdaDrugInt.x[curInd]
+	ogbACSFIntSort.x[m-1] = ogbACSFInt.x[curInd]
+	ogbDrugIntSort.x[m-1] = ogbDrugInt.x[curInd]
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// INTEGRAL ANALYSIS FOR RANDOM LOCATIONS
+////////////////////////////////////////////////////////////////////////////
+
+// for unsorted responses
+
+objref voltACSFBInt,voltDrugBInt,ogbACSFBInt,ogbDrugBInt
+
+voltACSFBInt = new Vector(numScan)
+voltDrugBInt = new Vector(numScan)
+ogbACSFBInt = new Vector(numScan)
+ogbDrugBInt = new Vector(numScan)
+
+for m=1,numScan{
+	voltACSFBInt.x[m-1] = getVoltageIntegral(voltACSFB[m-1],dt,tBaseline,tstop)
+	voltDrugBInt.x[m-1] = getVoltageIntegral(voltDrugB[m-1],dt,tBaseline,tstop)
+	ogbACSFBInt.x[m-1] = getVoltageIntegral(ogbACSFB[m-1],dt,tBaseline,tstop)
+	ogbDrugBInt.x[m-1] = getVoltageIntegral(ogbDrugB[m-1],dt,tBaseline,tstop)
+}
+
+// for sorted responses
+
+objref voltACSFBIntSort,voltDrugBIntSort,ogbACSFBIntSort,ogbDrugBIntSort
+voltACSFBIntSort = new Vector(numScan)
+voltDrugBIntSort = new Vector(numScan)
+ogbACSFBIntSort = new Vector(numScan)
+ogbDrugBIntSort = new Vector(numScan)
+
+for m=1,numScan{
+	curInd = randDistsSortX.x[m-1]
+	
+	voltACSFBIntSort.x[m-1] = voltACSFBInt.x[curInd]
+	voltDrugBIntSort.x[m-1] = voltDrugBInt.x[curInd]
+	ogbACSFBIntSort.x[m-1] = ogbACSFBInt.x[curInd]
+	ogbDrugBIntSort.x[m-1] = ogbDrugBInt.x[curInd]	
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// RATIO ANALYSIS
+////////////////////////////////////////////////////////////////////////////
+
+// Recording from the apical trunk
+
+{
+	dend1 = getVoltageIntegral(dendACSF,dt,tBaseline,tstop)
+	dend2 = getVoltageIntegral(dendDrug,dt,tBaseline,tstop)
+	dendIntRatio = dend2/dend1
+}
+
+// [Ca]OGB
+
+objref ogbRatioPeakSort, ogbRatioIntSort
+objref ogbRatioBPeakSort, ogbRatioBIntSort
+objref foo1, foo2, foo3, foo4
+ogbRatioPeakSort = new Vector(numSyn)
+ogbRatioIntSort = new Vector(numSyn)
+ogbRatioBPeakSort = new Vector(numScan)
+ogbRatioBIntSort = new Vector(numScan)
+foo1 = new Vector(numSyn)
+foo2 = new Vector(numSyn)
+foo3 = new Vector(numScan)
+foo4 = new Vector(numScan)
+
+{	
+	foo1.copy(ogbDrugPeakSort)   
+	ogbRatioPeakSort = foo1.div(ogbACSFPeakSort)
+	foo2.copy(ogbDrugIntSort)
+	ogbRatioIntSort = foo2.div(ogbACSFIntSort)
+	
+	foo3.copy(ogbDrugBPeakSort)
+	ogbRatioBPeakSort = foo3.div(ogbACSFBPeakSort)
+	foo4.copy(ogbDrugBIntSort)
+	ogbRatioBIntSort = foo4.div(ogbACSFBIntSort)
+}
+
+// Mean and Standard deviation
+objref ogbRatioPeakMeanVec,ogbRatioPeakSDVec
+objref ogbRatioIntMeanVec,ogbRatioIntSDVec
+objref ogbRatioBPeakMeanVec,ogbRatioBPeakSDVec
+objref ogbRatioBIntMeanVec,ogbRatioBIntSDVec
+
+	ogbRatioPeakMeanVec = new Vector(1)
+	ogbRatioPeakSDVec = new Vector(1)
+	ogbRatioIntMeanVec = new Vector(1)
+	ogbRatioIntSDVec = new Vector(1)
+	ogbRatioBPeakMeanVec = new Vector(1)
+	ogbRatioBPeakSDVec = new Vector(1)
+	ogbRatioBIntMeanVec = new Vector(1)
+	ogbRatioBIntSDVec = new Vector(1)
+
+{	
+	ogbRatioPeakMeanVec.x[0] = ogbRatioPeakSort.mean()
+	ogbRatioPeakSDVec.x[0] = ogbRatioPeakSort.stdev()
+	ogbRatioIntMeanVec.x[0] = ogbRatioIntSort.mean()
+	ogbRatioIntSDVec.x[0] = ogbRatioIntSort.stdev()
+	
+	ogbRatioBPeakMeanVec.x[0] = ogbRatioBPeakSort.mean()
+	ogbRatioBPeakSDVec.x[0] = ogbRatioBPeakSort.stdev()
+	ogbRatioBIntMeanVec.x[0] = ogbRatioBIntSort.mean()
+	ogbRatioBIntSDVec.x[0] = ogbRatioBIntSort.stdev()
+}

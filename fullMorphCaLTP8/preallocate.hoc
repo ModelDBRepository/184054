@@ -1,0 +1,10 @@
+totalDistSegs = 0
+forsec distTuft {
+	for (x){
+		totalDistSegs+=1
+	}
+}
+numScan = totalDistSegs
+
+objref nmdaACSFPeakSort,nmdaTTXPeakSort,nmdaACSFIntSort,nmdaTTXIntSort,inputDistsSortY,voltACSFBPeakSort,voltTTXBPeakSort,voltACSFBIntSort,voltTTXBIntSort,caiACSFBPeakSort,caiTTXBPeakSort,caiACSFBIntSort,caiTTXBIntSort,randDistsSortY // need to be declared here, otherwise an error is given in "for" loop
+

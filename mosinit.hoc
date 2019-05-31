@@ -1,0 +1,4 @@
+//moddir fullMorphCaLTP8
+load_file("nrngui.hoc")
+chdir("fullMorphCaLTP8")
+load_file("start.hoc")

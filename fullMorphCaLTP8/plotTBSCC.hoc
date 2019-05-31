@@ -1,0 +1,321 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// PLOT RESULTS
+//
+////////////////////////////////////////////////////////////////////////////////
+
+{
+	load_file("../commonFcns/getCumHist.hoc")
+	load_file("../commonFcns/getBargraphVec.hoc")
+	
+	load_file("../commonFcns/decimal.hoc")
+	load_file("../commonFcns/mod.hoc")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// RESPONSE AT AN EXAMPLARY DENDRITIC LOCATION
+///////////////////////////////////////////////////////////////////////////////
+
+objref voltExGraph,nmdaExGraph,ogbExGraph,calHExGraph
+objref voltExBox,nmdaExBox,ogbExBox,calHExBox
+
+// below are parameters used for graphing
+voltLowY = -60
+voltHighY = -10
+nmdaLowY = -0.0012
+nmdaHighY = 0
+ogbLowY = 0
+ogbHighY = 0.05 //1.1
+ogbLowYB = -0.5 //0
+ogbHighYB = 5 //1.1
+calHLowY = -0.015
+calHHighY = 0
+
+exSyn = 102 // 61
+
+exLeft = 250 
+peakLeft = 400
+histLeft = 700
+momentLeft = 800
+
+
+voltExBox = new HBox()                          // plot the response at exSyn												
+{
+	voltExBox.intercept(1)                      
+	{
+		voltExGraph = new Graph()
+		voltACSF[exSyn].plot(voltExGraph,time,1,1)
+		voltDrug[exSyn].plot(voltExGraph,time,CL,1)
+		voltExGraph.label("Voltage, Control")
+		voltExGraph.color(CL)
+		voltExGraph.label("Voltage, Simulated drug")
+		voltExGraph.size(0,100,voltLowY,voltHighY)
+	}
+	voltExBox.intercept(0)
+	voltExBox.map("Example voltage",exLeft,0,300,300)
+	voltExGraph.exec_menu("View = plot")
+}
+
+nmdaExBox = new HBox()
+{
+	nmdaExBox.intercept(1)
+	{
+		nmdaExGraph = new Graph()
+		nmdaACSF[exSyn].plot(nmdaExGraph,time,1,1)
+		nmdaDrug[exSyn].plot(nmdaExGraph,time,CL,1)
+		nmdaExGraph.label("I_Ca,NMDA, Control")
+		nmdaExGraph.color(CL)
+		nmdaExGraph.label("I_Ca,NMDA, Simulated drug")
+		nmdaExGraph.size(0,100,nmdaLowY,nmdaHighY)
+	}
+	nmdaExBox.intercept(0)
+	nmdaExBox.map("Example I_Ca,NMDA",exLeft,300,300,300)
+	nmdaExGraph.exec_menu("View = plot")
+}
+
+ogbExBox = new HBox()                  
+{
+	ogbExBox.intercept(1) 
+	{
+		ogbExGraph = new Graph()
+		ogbACSF[exSyn].plot(ogbExGraph,time,1,1)
+		ogbDrug[exSyn].plot(ogbExGraph,time,CL,1)
+		ogbExGraph.label("[Ca]OGB, Control")
+		ogbExGraph.color(CL)
+		ogbExGraph.label("[Ca]OGB, Simulated drug")
+		ogbExGraph.size(0,100,ogbLowY,ogbHighY)
+	}
+	ogbExBox.intercept(0)
+	ogbExBox.map("Example [Ca]OGB",exLeft,600,300,300)
+	ogbExGraph.exec_menu("View = plot")
+}
+
+calHExBox = new HBox() 
+{
+	calHExBox.intercept(1) 
+	{
+		calHExGraph = new Graph()
+		calHACSF[exSyn].plot(calHExGraph,time,1,1)
+		calHDrug[exSyn].plot(calHExGraph,time,CL,1)
+		calHExGraph.label("I_Ca,L-Cav, Control")
+		calHExGraph.color(CL)
+		calHExGraph.label("I_Ca,L-Cav, Simulated drug")
+		calHExGraph.size(0,100,calHLowY,calHHighY)
+	}
+	calHExBox.intercept(0)
+	calHExBox.map("Example I_Ca,L-Cav",exLeft,900,300,300)
+	calHExGraph.exec_menu("View = plot")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// RESPONSE AT THE DENDRITIC APICAL TRUNK ~300 um FROM THE SOMA
+///////////////////////////////////////////////////////////////////////////////
+
+objref integralGraph
+integralGraph = new Graph()
+strdef dendIntegralLabel
+{
+	// write label
+	sprint(dendIntegralLabel,"%s%.2g","At the trunk, ratio of integrals = ",dendIntRatio)
+
+	// plot to graph
+	dendACSF.plot(integralGraph,time,1,1)
+	dendDrug.plot(integralGraph,time,CL,1)
+	integralGraph.label("Voltage at apical trunk, Control")
+	integralGraph.color(CL)
+	integralGraph.label("Voltage at apical trunk, Simulated drug")
+	integralGraph.exec_menu("View = plot")
+	
+	// label graphs
+	integralGraph.label(dendIntegralLabel)
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// SHAPE PLOT OF RECORDING LOCATIONS
+///////////////////////////////////////////////////////////////////////////////
+
+numDum = 2
+objref vBoxShape,shplot,dumCC[numDum]
+
+// build dummy current clamps and demarcate locations
+{
+	// simulated recording sites
+	dendA5_01111111111111 {dumCC[0] = new IClamp(0.5)}
+	// exSyn = 102
+	dendA5_0111111111111111111 {
+		dumCC[1] = new IClamp(0.78571429)
+	}
+	// exSyn = 61
+	//dendA5_0111111111111111111 {
+	//	dumCC[1] = new IClamp(0.35714286)
+	//}
+	for m=1,numDum {
+		dumCC[m-1].dur = 0
+		dumCC[m-1].amp = 0
+	}
+	
+	vBoxShape = new VBox()
+	vBoxShape.intercept(1)
+	shplot = new Shape()
+	
+	for m=1,numSyn {
+		shplot.point_mark(nmda[m-1],1,"O",6)
+	}
+	
+	
+	shplot.point_mark(dumCC[0],2,"O",12)
+	shplot.point_mark(dumCC[1],3,"O",12)
+
+	shplot.label("Large circles: recording sites")
+	shplot.label("Black: Synapses")
+	shplot.exec_menu("Whole Scene")
+	shplot.flush()
+	vBoxShape.intercept(0)
+	vBoxShape.map("Spatial distribution of point processes",1200,0,500,900)
+	shplot.exec_menu("View = plot")
+	shplot.exec_menu("Show Diam")
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// GENERATE SUMMARY PLOTS
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Moments of peak responses
+
+objref momentAxis
+momentAxis = new Vector(1)	// to be used as the x-axis; doesn't really matter
+momentAxis.x[0] = 1
+
+
+objref voltACSFPeakMeanVec,voltDrugPeakMeanVec
+objref voltACSFPeakSDVec,voltDrugPeakSDVec
+
+{
+	voltACSFPeakMeanVec = new Vector(1)
+	voltACSFPeakSDVec = new Vector(1)
+	voltDrugPeakMeanVec = new Vector(1)
+	voltDrugPeakSDVec = new Vector(1)
+	/*
+	voltACSFPeakMeanVec.x[0] = voltACSFPeakSort.mean()
+	voltACSFPeakSDVec.x[0] = voltACSFPeakSort.stdev()
+	voltDrugPeakMeanVec.x[0] = voltDrugPeakSort.mean()
+	voltDrugPeakSDVec.x[0] = voltDrugPeakSort.stdev()
+	*/
+	voltACSFPeakMeanVec.x[0] = voltACSFBPeakSort.mean()   
+	voltACSFPeakSDVec.x[0] = voltACSFBPeakSort.stdev()
+	voltDrugPeakMeanVec.x[0] = voltDrugBPeakSort.mean()
+	voltDrugPeakSDVec.x[0] = voltDrugBPeakSort.stdev()
+}
+
+
+objref voltMomentBox,voltMomentGraph
+{
+	voltMomentBox = new HBox()
+	voltMomentBox.intercept(1)
+	{
+		voltMomentGraph = new Graph()
+		voltACSFPeakMeanVec.ploterr(voltMomentGraph,momentAxis,voltACSFPeakSDVec)
+		voltACSFPeakMeanVec.mark(voltMomentGraph,momentAxis,"-")
+		voltMomentGraph.color(CL)
+		voltDrugPeakMeanVec.ploterr(voltMomentGraph,momentAxis,voltDrugPeakSDVec)
+		voltDrugPeakMeanVec.mark(voltMomentGraph,momentAxis,"-")
+		voltMomentGraph.size(0,2,voltLowY,voltHighY)
+	}
+	voltMomentBox.intercept(0)
+	voltMomentBox.map("Voltage moments",momentLeft,0,100,300)
+}
+
+
+objref ogbACSFPeakMeanVec,ogbDrugPeakMeanVec
+objref ogbACSFPeakSDVec,ogbDrugPeakSDVec
+
+{	
+	ogbACSFPeakMeanVec = new Vector(1)
+	ogbACSFPeakSDVec = new Vector(1)
+	ogbDrugPeakMeanVec = new Vector(1)
+	ogbDrugPeakSDVec = new Vector(1)
+	/*
+	ogbACSFPeakMeanVec.x[0] = ogbACSFPeakSort.mean()
+	ogbACSFPeakSDVec.x[0] = ogbACSFPeakSort.stdev()
+	ogbDrugPeakMeanVec.x[0] = ogbDrugPeakSort.mean()
+	ogbDrugPeakSDVec.x[0] = ogbDrugPeakSort.stdev()
+	*/
+	ogbACSFPeakMeanVec.x[0] = ogbACSFBPeakSort.mean()
+	ogbACSFPeakSDVec.x[0] = ogbACSFBPeakSort.stdev()
+	ogbDrugPeakMeanVec.x[0] = ogbDrugBPeakSort.mean()
+	ogbDrugPeakSDVec.x[0] = ogbDrugBPeakSort.stdev()
+}
+
+
+objref ogbMomentBox,ogbMomentGraph
+{
+	ogbMomentBox = new HBox()
+	ogbMomentBox.intercept(1)
+	{
+		ogbMomentGraph = new Graph()
+		ogbACSFPeakMeanVec.ploterr(ogbMomentGraph,momentAxis,ogbACSFPeakSDVec)
+		ogbACSFPeakMeanVec.mark(ogbMomentGraph,momentAxis,"-")
+		ogbMomentGraph.color(CL)
+		ogbDrugPeakMeanVec.ploterr(ogbMomentGraph,momentAxis,ogbDrugPeakSDVec)
+		ogbDrugPeakMeanVec.mark(ogbMomentGraph,momentAxis,"-")
+		//ogbRatioPeakMeanVec.ploterr(ogbMomentGraph,momentAxis,ogbRatioPeakSDVec)
+		//ogbRatioPeakMeanVec.mark(ogbMomentGraph,momentAxis,"-")
+		//ogbRatioBPeakMeanVec.ploterr(ogbMomentGraph,momentAxis,ogbRatioBPeakSDVec)
+		//ogbRatioBPeakMeanVec.mark(ogbMomentGraph,momentAxis,"-")
+		ogbMomentGraph.size(0,2,ogbLowY,ogbHighY)
+	}
+	ogbMomentBox.intercept(0)
+	ogbMomentBox.map("Peak [Ca]OGB moments",momentLeft,600,100,300)
+	//ogbMomentBox.map("Normalized peak [Ca]OGB moments",momentLeft,600,100,300)
+}
+
+
+
+// Moments of response integrals  
+
+objref ogbACSFIntMeanVec,ogbDrugIntMeanVec
+objref ogbACSFIntSDVec,ogbDrugIntSDVec
+
+{	
+	ogbACSFIntMeanVec = new Vector(1)
+	ogbACSFIntSDVec = new Vector(1)
+	ogbDrugIntMeanVec = new Vector(1)
+	ogbDrugIntSDVec = new Vector(1)
+	/*
+	ogbACSFIntMeanVec.x[0] = ogbACSFIntSort.mean()
+	ogbACSFIntSDVec.x[0] = ogbACSFIntSort.stdev()
+	ogbDrugIntMeanVec.x[0] = ogbDrugIntSort.mean()
+	ogbDrugIntSDVec.x[0] = ogbDrugIntSort.stdev()
+	*/
+	ogbACSFIntMeanVec.x[0] = ogbACSFBIntSort.mean()
+	ogbACSFIntSDVec.x[0] = ogbACSFBIntSort.stdev()
+	ogbDrugIntMeanVec.x[0] = ogbDrugBIntSort.mean()
+	ogbDrugIntSDVec.x[0] = ogbDrugBIntSort.stdev()
+}
+
+objref ogbMomentBoxB,ogbMomentGraphB
+{
+	ogbMomentBoxB = new HBox()
+	ogbMomentBoxB.intercept(1)
+	{
+		ogbMomentGraphB = new Graph()
+		ogbACSFIntMeanVec.ploterr(ogbMomentGraphB,momentAxis,ogbACSFIntSDVec)
+		ogbACSFIntMeanVec.mark(ogbMomentGraphB,momentAxis,"-")
+		ogbMomentGraphB.color(CL)
+		ogbDrugIntMeanVec.ploterr(ogbMomentGraphB,momentAxis,ogbDrugIntSDVec)
+		ogbDrugIntMeanVec.mark(ogbMomentGraphB,momentAxis,"-")
+		//ogbRatioIntMeanVec.ploterr(ogbMomentGraphB,momentAxis,ogbRatioIntSDVec)
+		//ogbRatioIntMeanVec.mark(ogbMomentGraphB,momentAxis,"-")
+		//ogbRatioBIntMeanVec.ploterr(ogbMomentGraphB,momentAxis,ogbRatioBIntSDVec)
+		//ogbRatioBIntMeanVec.mark(ogbMomentGraphB,momentAxis,"-")
+		ogbMomentGraphB.size(0,2,ogbLowYB,ogbHighYB)
+	}
+	ogbMomentBoxB.intercept(0)
+	ogbMomentBoxB.map("Integral of [Ca]OGB moments",momentLeft,900,100,300)
+	//ogbMomentBoxB.map("Normalized integral of [Ca]OGB moments",momentLeft,900,100,300)
+}

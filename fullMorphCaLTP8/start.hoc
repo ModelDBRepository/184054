@@ -1,0 +1,60 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// A MODEL FOR eLife 2015;10.7554/eLife.06414 
+// Yujin Kim*, Ching-Lung Hsu*, Mark Cembrowski, Brett Mensh, Nelson Spruston
+//
+// MODEL AUTHORS: Mark Cembrowski and Ching-Lung Hsu
+//
+// TO SUPPLEMENT EXPERIMENTS BY Yujin Kim and Ching-Lung Hsu
+// For correspondence: Nelson Spruston 
+// Janelia Research Campus, Howard Hughes Medical Institute
+// July, 2015
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// LOAD GUI.
+{
+	load_file("nrngui.hoc")
+}
+
+// LOAD MORPHOLOGY RESETTING nseg AS NECESSARY; CREATE STIMULATING ELECTRODE
+{
+	xopen("morphology_ri06.nrn")	// pyramidal neuron geometry
+	xopen("naceaxon.nrn")		// axon geometry (fake)
+	load_file("resetNSeg.hoc")	// reset nseg as needed
+}
+
+// CREATE STIMULATING ELECTRODE
+objref ppStim
+{
+	ppStim = new SpGen2(0.5)
+}
+
+// IMPLEMENT ION CHANNELS
+{
+	xopen("init.hoc")
+}
+
+// LOAD INITIALIZATION AND RUN ROUTINES
+{
+	load_file("initializationAndRun.hoc")
+} 
+
+// PREALLOCATE MEMORY
+{
+	load_file("preallocate.hoc")
+}
+
+print "\n\n\n" // make some space
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// SELECT STIMULATION AND RECORDING CONFIGURATION: comment out the config that is not to be used
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+// DO A SINGLE TBS STIMULUS
+{
+	print "\tSimulating response to single high-frequency burst of TBS of the perforant path"
+	
+	xopen("doTBSStimCC.hoc")
+}
+

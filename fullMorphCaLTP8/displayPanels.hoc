@@ -1,0 +1,32 @@
+// LOAD CONTROL MENU
+/*
+objref contrl
+contrl = new VBox()
+{
+	contrl.intercept(1)
+	nrncontrolmenu()
+	contrl.intercept(0)
+	contrl.map("Control",0,75,-1,-1)	// left, top, width, height
+}
+*/
+/*
+proc ncWeightUpdate(){
+	for m=1,numSyn{
+		ncAMPA[m-1].weight = ampaWeightB
+		ncNMDA[m-1].weight = nmdaWeightB
+	}
+}
+*/
+
+// DISPLAY VOLTAGE-GATED CHANNEL PARAMETERS
+{
+	xpanel("Voltage-gated chan params")
+	xvalue("gnabar","gnabar",1,"initchannels(ttxSoma,ttxBath)")
+	xvalue("gkdr","gkdr",1,"initchannels(ttxSoma,ttxBath)")
+	xvalue("gkap","gkap",1,"initchannels(ttxSoma,ttxBath)")
+	xvalue("gkad","gkad",1,"initchannels(ttxSoma,ttxBath)")
+	xvalue("gcad","gcad",1,"initchannels(ttxSoma,ttxBath)")
+	xstatebutton("TTX at soma",&ttxSoma,"initchannels(ttxSoma,ttxBath)")
+	xstatebutton("TTX in bath",&ttxBath,"initchannels(ttxSoma,ttxBath)")
+	xpanel(0,400,-1,-1)
+}

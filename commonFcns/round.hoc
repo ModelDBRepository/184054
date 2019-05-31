@@ -1,0 +1,7 @@
+func round(){
+	if($1>0){
+		return int($1+0.5)
+	}else{
+		return int($1-0.5)
+	}
+}

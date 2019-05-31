@@ -1,0 +1,52 @@
+ttxSoma = 0		// simulate 20nM TTX in bath?  0 = no; 1 = yes
+
+celsius = 35
+v_init = -70
+			
+global_ra=200.00 	// internal resistivity in ohm-cm 
+Cm=1.5  		// specific membrane capacitance in uF/cm^2 
+Cmy=0.075 		// capacitance in myelin 
+Rm=40000		// specific membrane resistivity in ohm-cm^2  
+Rn=50			// nodal resistivity 
+Vleak=-66		// leak reversal -66 in Cs+
+Vrest=-70		// resting potential -60 in control, -66 in Cs+
+
+ttxScale = 0.5		// amount that 20 nM TTX scales the available Na conductance; 1=no block; 0 = complete block
+
+spinelimit=100      	// distance beyond which to modify for spines 
+spinefactor=2.0     	// factor by which to change passive properties 
+
+gnainit0 = 0.042	// Na conductance at soma
+gnaslope0 = 0.000025	// Na channel density decay per um
+gnabar=0.042		// sodium conductance 
+gnode=0 //40.0		// sodium conductance at a node; MSC switched this 
+
+setgk = .036		// A-type potassium starting density, used in init_bday.hoc
+setokslope = 0		// slope of A-type potassium conductance along individual oblique branches. set to 0 in all simulations
+
+gcad = 0.00125		// L-type Ca density, from Poirazi et al., 2003
+caslope = 0
+
+gkdr=0.040          	// delayed rectifier density 
+gkap=setgk          	// proximal A-type potassium starting density 
+gkad=setgk          	// distal A-type potassium  starting density 
+
+dlimit=300          	// cut-off for increase of A-type density 
+dprox=50           	// distance to switch from proximal to distal type 
+dslope=0.01         	// slope of A-type density 
+
+okslope = setokslope	// oblique potassium channel gradient 
+okmax = .5		// max potassium channel conductance  
+
+ampaWeight = 0.00018 	// in uS; Jarsky et al., 2005
+nmdaWeight = 0.00018	// in uS
+
+theSeed = 1		// seed of random number generator
+
+numSyn = 150	 	// number of synapses
+
+slowInact = 0		// amount of slow inactivation.  1 = no slow inact; 0 = complete slow inact
+
+// gnaTuft0 and gnaTuftS are not used
+gnaTuft0 = 0.04		// initial VGNaC denisty in the tuft
+gnaTuftS = 0.00002	// slope of VGNaC density in the tuft
